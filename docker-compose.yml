@@ -1,0 +1,59 @@
+version: "2"
+services:
+
+    mysql:
+        container_name: mysql
+        image: "mysql:8.0.0"
+        ports: [ "3306:3306" ]
+        volumes:
+            - "/var/lib/mysql:/var/lib/mysql"
+            - "/etc/mysql:/etc/mysql/conf.d:ro"
+        environment:
+            MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        restart: unless-stopped
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "25m"
+                max-file: "1"
+
+    php:
+        container_name: php
+        image: "darsyn/php:3.3.15"
+        build: "./zanbaldwin/docker-srv/images/php"
+        restart: unless-stopped
+        links: [ "mysql", "redis" ]
+        volumes:
+            - "./:/srv/public"
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "25m"
+                max-file: "1"
+        user: "1000"
+
+    redis:
+        container_name: redis
+        image: "redis:3.2.11-alpine"
+        restart: unless-stopped
+        volumes:
+            - "/var/lib/redis:/data"
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "25m"
+                max-file: "1"
+
+    web:
+        container_name: nginx
+        image: "darsyn/web:3.3.15"
+        build: "./zanbaldwin/docker-srv/images/web"
+        restart: unless-stopped
+        links: [ "php" ]
+        ports: [ "80:80" ]
+        volumes_from: [ "php" ]
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "25m"
+                max-file: "1"
