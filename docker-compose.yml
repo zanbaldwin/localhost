@@ -17,6 +17,22 @@ services:
                 max-size: "25m"
                 max-file: "1"
 
+    redis:
+        container_name: redis
+        image: "redis:3.2.11-alpine"
+        restart: unless-stopped
+        volumes:
+            - "/var/lib/redis:/data"
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "25m"
+                max-file: "1"
+
+    # The docker-srv directory referenced here should be cloned from
+    # "zanbaldwin/docker-srv" at the same directory level as this
+    # "zanbaldwin/localhost" repository.
+
     php:
         container_name: php
         image: "docker-srv/php"
@@ -32,18 +48,6 @@ services:
                 max-size: "25m"
                 max-file: "1"
         user: "${UID:-1000}"
-
-    redis:
-        container_name: redis
-        image: "redis:3.2.11-alpine"
-        restart: unless-stopped
-        volumes:
-            - "/var/lib/redis:/data"
-        logging:
-            driver: "json-file"
-            options:
-                max-size: "25m"
-                max-file: "1"
 
     web:
         container_name: web
