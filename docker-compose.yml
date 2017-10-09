@@ -1,4 +1,4 @@
-version: "2"
+version: "2.1"
 services:
 
     mysql:
@@ -19,18 +19,19 @@ services:
 
     php:
         container_name: php
-        image: "darsyn/php:3.3.15"
-        build: "./zanbaldwin/docker-srv/images/php"
+        image: "docker-srv/php"
+        build: "../docker-srv/images/php"
         restart: unless-stopped
         links: [ "mysql", "redis" ]
         volumes:
-            - "./:/srv/public"
+            - "../:/srv/public"
+        working_dir: "/srv/public"
         logging:
             driver: "json-file"
             options:
                 max-size: "25m"
                 max-file: "1"
-        user: "1000"
+        user: "${UID:-1000}"
 
     redis:
         container_name: redis
@@ -45,9 +46,10 @@ services:
                 max-file: "1"
 
     web:
-        container_name: nginx
-        image: "darsyn/web:3.3.15"
-        build: "./zanbaldwin/docker-srv/images/web"
+        container_name: web
+        image: "docker-srv/web"
+        build: "../docker-srv/images/web"
+        hostname: localhost
         restart: unless-stopped
         links: [ "php" ]
         ports: [ "80:80" ]
