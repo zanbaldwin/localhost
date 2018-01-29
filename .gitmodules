@@ -1,4 +1,4 @@
 [submodule "docker-srv"]
 	path = zanbaldwin/docker-srv
-	url = git@github.com:zanbaldwin/docker-srv
+	url = git://github.com/zanbaldwin/docker-srv.git
 	branch = develop
