@@ -57,6 +57,7 @@ services:
         restart: "unless-stopped"
         volumes: [ "/var/lib/neo4j:/data" ]
         ports: [ "7474:7474", "7687:7687" ]
+        networks: [ "localhost" ]
         environment:
             NEO4J_AUTH: "none"
         logging:
@@ -70,14 +71,13 @@ services:
         image: "redis:3.2.11-alpine"
         restart: "unless-stopped"
         volumes: [ "/var/lib/redis:/data" ]
+        networks: [ "localhost" ]
         ports: [ "6379:6379" ]
         logging:
             driver: "json-file"
             options:
                 max-size: "5m"
                 max-file: "1"
-        networks:
-            - "localhost"
 
     mitm:
         image: "mitmproxy/mitmproxy:2.0.1"
@@ -90,3 +90,4 @@ services:
 
 networks:
     localhost:
+        name: "localhost"
