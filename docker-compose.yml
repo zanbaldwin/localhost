@@ -24,7 +24,7 @@ services:
         command: [ "php-fpm", "-d", "zend_extension=xdebug.so", "--allow-to-run-as-root", "--nodaemonize" ]
         build: "./zanbaldwin/docker-srv/images/php"
         restart: "unless-stopped"
-        links: [ "mysql", "redis" ]
+        links: [ "mysql", "neo4j", "redis" ]
         volumes: [ "./:/srv/public" ]
         working_dir: "/srv/public"
         ports: [ "9000-9001:9000-9001" ]
