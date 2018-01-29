@@ -21,6 +21,7 @@ services:
     php:
         container_name: "php"
         image: "localhost/php"
+        command: [ "php-fpm", "-d", "zend_extension=xdebug.so", "--allow-to-run-as-root", "--nodaemonize" ]
         build: "./zanbaldwin/docker-srv/images/php"
         restart: "unless-stopped"
         links: [ "mysql", "redis" ]
@@ -42,7 +43,6 @@ services:
         restart: "unless-stopped"
         volumes: [ "/var/lib/mysql:/var/lib/mysql" ]
         networks: [ "localhost" ]
-        user: "${UID:-1000}"
         environment:
             MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
         logging:
