@@ -1,65 +1,92 @@
-version: "2.1"
+version: "3.5"
 services:
 
-    mysql:
-        container_name: mysql
-        image: "mysql:8.0.0"
-        ports: [ "3306:3306" ]
-        volumes:
-            - "/var/lib/mysql:/var/lib/mysql"
-            - "/etc/mysql:/etc/mysql/conf.d:ro"
+    web:
+        container_name: "nginx"
+        image: "localhost/web"
+        build: "./zanbaldwin/docker-srv/images/web"
+        restart: "unless-stopped"
+        links: [ "php" ]
+        ports: [ "80:80" ]
+        volumes: [ "./:/srv/public:ro" ]
+        networks: [ "localhost" ]
         environment:
-            MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-        restart: unless-stopped
+            AUTOINDEX: "on"
         logging:
             driver: "json-file"
             options:
-                max-size: "25m"
+                max-size: "15m"
+                max-file: "1"
+
+    php:
+        container_name: "php"
+        image: "localhost/php"
+        build: "./zanbaldwin/docker-srv/images/php"
+        restart: "unless-stopped"
+        links: [ "mysql", "redis" ]
+        volumes: [ "./:/srv/public" ]
+        working_dir: "/srv/public"
+        ports: [ "9000-9001:9000-9001" ]
+        user: "${UID:-1000}"
+        networks: [ "localhost" ]
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "15m"
+                max-file: "1"
+
+    mysql:
+        container_name: "mysql"
+        image: "mysql:8.0.3"
+        ports: [ "3306:3306" ]
+        restart: "unless-stopped"
+        volumes: [ "/var/lib/mysql:/var/lib/mysql" ]
+        networks: [ "localhost" ]
+        user: "${UID:-1000}"
+        environment:
+            MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "5m"
+                max-file: "1"
+
+    neo4j:
+        container_name: "neo4j"
+        image: "neo4j:3.3.2"
+        restart: "unless-stopped"
+        volumes: [ "/var/lib/neo4j:/data" ]
+        ports: [ "7474:7474", "7687:7687" ]
+        environment:
+            NEO4J_AUTH: "none"
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "5m"
                 max-file: "1"
 
     redis:
-        container_name: redis
+        container_name: "redis"
         image: "redis:3.2.11-alpine"
-        restart: unless-stopped
-        volumes:
-            - "/var/lib/redis:/data"
+        restart: "unless-stopped"
+        volumes: [ "/var/lib/redis:/data" ]
+        ports: [ "6379:6379" ]
         logging:
             driver: "json-file"
             options:
-                max-size: "25m"
+                max-size: "5m"
                 max-file: "1"
+        networks:
+            - "localhost"
 
-    # The docker-srv directory referenced here should be cloned from
-    # "zanbaldwin/docker-srv" at the same directory level as this
-    # "zanbaldwin/localhost" repository.
+    mitm:
+        image: "mitmproxy/mitmproxy:2.0.1"
+        container_name: "mitm"
+        ports: [ "8080:8080", "8081:8081" ]
+        volumes: [ "${HOME}/.mitmproxy:/home/mitmproxy/.mitmproxy" ]
+        command: [ "mitmweb", "--web-iface", "0.0.0.0", "--web-debug" ]
+        logging: { driver: "none" }
+        networks: [ "localhost" ]
 
-    php:
-        container_name: php
-        image: "docker-srv/php"
-        build: "../docker-srv/images/php"
-        restart: unless-stopped
-        links: [ "mysql", "redis" ]
-        volumes:
-            - "../:/srv/public"
-        working_dir: "/srv/public"
-        logging:
-            driver: "json-file"
-            options:
-                max-size: "25m"
-                max-file: "1"
-        user: "${UID:-1000}"
-
-    web:
-        container_name: web
-        image: "docker-srv/web"
-        build: "../docker-srv/images/web"
-        hostname: localhost
-        restart: unless-stopped
-        links: [ "php" ]
-        ports: [ "80:80" ]
-        volumes_from: [ "php" ]
-        logging:
-            driver: "json-file"
-            options:
-                max-size: "25m"
-                max-file: "1"
+networks:
+    localhost:
