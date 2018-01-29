@@ -1,2 +1,0 @@
-#!/bin/bash
-docker exec -it --user="$(id -u):$(id -g)" php ${@:-sh}
