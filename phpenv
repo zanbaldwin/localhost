@@ -1,0 +1,33 @@
+#!/bin/sh
+DOCKER=${DOCKER:-"docker"}
+command -v "${DOCKER}" >/dev/null 2>&1 || { echo >&2 "$(tput setaf 1)Docker Client \"${DOCKER}\" not installed.$(tput sgr0)"; return 1; }
+
+INFO=$("${DOCKER}" info >/dev/null 2>&1)
+if [ $? -ne 0 ]; then
+    echo >&2 "$(tput setaf 1)Docker Daemon unavailable. Aborting!$(tput sgr0)"
+    if [ "$(id -u 2>/dev/null)" -ne "0" ]; then
+        echo >&2 "$(tput setaf 1)Perhaps retry as root?$(tput sgr0)"
+    fi
+    return 1
+fi
+
+IMAGE=${IMAGE:-"php"}
+VERSION=${VERSION:-"alpine"}
+
+COMPOSER="$(which composer 2>/dev/null)"
+CACHE=""
+if [ $? -eq 0 ]; then
+    COMPOSER="-v \"${COMPOSER}:/bin/composer\""
+    COMPOSER_HOME_DIR="$(composer global config home 2>/dev/null)"
+    if [ $? -eq 0 ] && [ -d "${COMPOSER_HOME_DIR}" ]; then
+        CACHE="-v \"${COMPOSER_HOME_DIR}:/.composer\" -e \"COMPOSER_HOME=/.composer\""
+    fi
+fi
+
+echo "$(tput setaf 2)Checking for newer version of \"${IMAGE}:${VERSION}\" on Docker Hub.$(tput setaf 6)"
+docker pull "${IMAGE}:${VERSION}" 2>/dev/null || echo >&2 "$(tput setaf 1)Could not connect to Docker Hub. Skipping update."
+echo "$(tput sgr0)"
+
+PHPENV="docker run -it --rm -v \"$(pwd):$(pwd)\" -w \"$(pwd)\" $CACHE $COMPOSER -u \"$(id -u):$(id -g)\" -e \"TERM=xterm\" \"${IMAGE}:${VERSION}\""
+SHELL=${SHELL:-"sh"}
+$SHELL -c "${PHPENV} sh"
