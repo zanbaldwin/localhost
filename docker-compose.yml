@@ -27,7 +27,7 @@ services:
         links: [ "mysql", "neo4j", "redis" ]
         volumes: [ "./:/srv/public" ]
         working_dir: "/srv/public"
-        ports: [ "9000-9001:9000-9001" ]
+        ports: [ "9000:9000" ]
         user: "${UID:-1000}"
         networks: [ "localhost" ]
         logging:
