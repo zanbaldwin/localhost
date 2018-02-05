@@ -30,6 +30,8 @@ services:
         ports: [ "9000:9000" ]
         user: "${UID:-1000}"
         networks: [ "localhost" ]
+        environment:
+            TERM: xterm
         logging:
             driver: "json-file"
             options:
