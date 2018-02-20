@@ -82,7 +82,7 @@ services:
                 max-file: "1"
 
     mitm:
-        image: "mitmproxy/mitmproxy:2.0.1"
+        image: "mitmproxy/mitmproxy:2.0.2"
         container_name: "mitm"
         ports: [ "8080:8080", "8081:8081" ]
         volumes: [ "${HOME}/.mitmproxy:/home/mitmproxy/.mitmproxy" ]
@@ -90,6 +90,21 @@ services:
         logging: { driver: "none" }
         networks: [ "localhost" ]
 
+    registry:
+        image: "registry:2.6.2"
+        container_name: "registry"
+        restart: "unless-stopped"
+        networks: [ "localhost" ]
+        ports: [ "5000:5000" ]
+        volumes:
+            - "/var/lib/registry:/var/lib/registry"
+
 networks:
     localhost:
         name: "localhost"
+        driver_opts:
+            com.docker.network.enable_ipv6: "true"
+        ipam:
+            driver: default
+            config:
+                -   subnet: 10.29.0.0/24
