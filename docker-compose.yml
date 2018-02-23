@@ -9,7 +9,6 @@ services:
         links: [ "php" ]
         ports: [ "80:80" ]
         volumes: [ "./:/srv/public:ro" ]
-        networks: [ "localhost" ]
         environment:
             AUTOINDEX: "on"
         logging:
@@ -29,7 +28,6 @@ services:
         working_dir: "/srv/public"
         ports: [ "9000:9000" ]
         user: "${UID:-1000}"
-        networks: [ "localhost" ]
         environment:
             TERM: xterm
         logging:
@@ -44,7 +42,6 @@ services:
         ports: [ "3306:3306" ]
         restart: "unless-stopped"
         volumes: [ "/var/lib/mysql:/var/lib/mysql" ]
-        networks: [ "localhost" ]
         environment:
             MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
         logging:
@@ -59,7 +56,6 @@ services:
         restart: "unless-stopped"
         volumes: [ "/var/lib/neo4j:/data" ]
         ports: [ "7474:7474", "7687:7687" ]
-        networks: [ "localhost" ]
         environment:
             NEO4J_AUTH: "none"
         logging:
@@ -73,7 +69,6 @@ services:
         image: "redis:3.2.11-alpine"
         restart: "unless-stopped"
         volumes: [ "/var/lib/redis:/data" ]
-        networks: [ "localhost" ]
         ports: [ "6379:6379" ]
         logging:
             driver: "json-file"
@@ -88,19 +83,17 @@ services:
         volumes: [ "${HOME}/.mitmproxy:/home/mitmproxy/.mitmproxy" ]
         command: [ "mitmweb", "--web-iface", "0.0.0.0", "--web-debug" ]
         logging: { driver: "none" }
-        networks: [ "localhost" ]
 
     registry:
         image: "registry:2.6.2"
         container_name: "registry"
         restart: "unless-stopped"
-        networks: [ "localhost" ]
         ports: [ "5000:5000" ]
         volumes:
             - "/var/lib/registry:/var/lib/registry"
 
 networks:
-    localhost:
+    default:
         name: "localhost"
         driver_opts:
             com.docker.network.enable_ipv6: "true"
