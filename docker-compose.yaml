@@ -1,4 +1,12 @@
 version: "3.5"
+
+x-logging:
+    &default-logging
+    driver: "json-file"
+    options:
+        max-size: "5m"
+        max-file: "1"
+
 services:
 
     web:
@@ -11,11 +19,7 @@ services:
         volumes: [ "./:/srv/public:ro" ]
         environment:
             AUTOINDEX: "on"
-        logging:
-            driver: "json-file"
-            options:
-                max-size: "15m"
-                max-file: "1"
+        logging: *default-logging
 
     php:
         container_name: "php"
@@ -29,25 +33,19 @@ services:
         user: "${UID:-1000}"
         environment:
             TERM: xterm
-        logging:
-            driver: "json-file"
-            options:
-                max-size: "15m"
-                max-file: "1"
+        logging: *default-logging
 
     mysql:
         container_name: "mysql"
-        image: "mysql:5.7"
+        image: "localhost/mysql"
+        build: "./zanbaldwin/docker-srv/images/mysql"
+        command: [ "--default-authentication-plugin", "mysql_native_password" ]
         ports: [ "3306:3306" ]
         restart: "unless-stopped"
         volumes: [ "/var/lib/mysql:/var/lib/mysql" ]
         environment:
             MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-        logging:
-            driver: "json-file"
-            options:
-                max-size: "5m"
-                max-file: "1"
+        logging: *default-logging
 
     neo4j:
         container_name: "neo4j"
@@ -57,11 +55,7 @@ services:
         ports: [ "7474:7474", "7687:7687" ]
         environment:
             NEO4J_AUTH: "none"
-        logging:
-            driver: "json-file"
-            options:
-                max-size: "5m"
-                max-file: "1"
+        logging: *default-logging
 
     redis:
         container_name: "redis"
@@ -69,11 +63,7 @@ services:
         restart: "unless-stopped"
         volumes: [ "/var/lib/redis:/data" ]
         ports: [ "6379:6379" ]
-        logging:
-            driver: "json-file"
-            options:
-                max-size: "5m"
-                max-file: "1"
+        logging: *default-logging
 
     mitm:
         image: "mitmproxy/mitmproxy:2.0.2"
